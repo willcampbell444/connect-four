@@ -21,6 +21,8 @@ void Graphics::drawFillRect(int x1, int y1, int x2, int y2, int r, int g, int b)
 
 	SDL_SetRenderDrawColor(_renderer, r, g, b, 255);
 	SDL_RenderFillRect(_renderer, &rect);
+	SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 255);
+	SDL_RenderDrawRect(_renderer, &rect);
 }
 
 void Graphics::drawRect(int x1, int y1, int x2, int y2, int r, int g, int b) {

@@ -3,6 +3,7 @@
 
 union SDL_Event;
 class Graphics;
+class Board;
 
 class Game {
 public:
@@ -12,6 +13,7 @@ public:
 private:
 	Graphics* _graphics;
 	SDL_Event* _event;
+	Board* _board;
 };
 
 
