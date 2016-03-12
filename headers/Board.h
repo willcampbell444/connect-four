@@ -8,10 +8,12 @@ public:
 	Board();
 	void insert(int x, int player);
 	int disksInRow(int x);
-	// int[7][6] getBoard();
+	char (*getBoard())[6];
 	void draw(Graphics* graphics);
 private:
-	int _board[7][6];
+	char _board[7][6];
+	// unsigned long long _p1;
+	// unsigned long long _p2;
 };
 
 #endif

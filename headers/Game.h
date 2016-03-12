@@ -10,10 +10,13 @@ public:
 	Game();
 	void drawBoard();
 	void play();
+	void aiMove();
+	// char checkWin(char *b[6]]);
 private:
 	Graphics* _graphics;
 	SDL_Event* _event;
 	Board* _board;
+	int _state;
 };
 
 

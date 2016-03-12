@@ -28,9 +28,9 @@ int Board::disksInRow(int x) {
 	return 6;
 }
 
-// int[7][6] Board::getBoard() {
-// 	return _board;
-// }
+char (*Board::getBoard())[6] {
+	return _board;
+}
 
 void  Board::draw(Graphics* graphics) {
 	int gridW = GLOBAL::WIDTH/7;
