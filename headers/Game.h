@@ -11,12 +11,14 @@ public:
 	void drawBoard();
 	void play();
 	void aiMove();
-	// char checkWin(char *b[6]]);
+	bool checkWin(unsigned long long b);
 private:
 	Graphics* _graphics;
 	SDL_Event* _event;
 	Board* _board;
 	int _state;
+
+	// unsigned long long wins[69]; // Contains all possible winning boards
 };
 
 
