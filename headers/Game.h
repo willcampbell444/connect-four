@@ -11,6 +11,10 @@ public:
 	void drawBoard();
 	void play();
 	void aiMove();
+	int analyze(unsigned long long p0, unsigned long long p1);
+	int negamax(unsigned long long p0, unsigned long long p1, int alpha, int beta, int color, int depth);
+	int minimax(unsigned long long blue, unsigned long long red, int alpha, int beta, int depth, bool maximize);
+	unsigned long long insertIntoBitboard(unsigned long long toAdd, unsigned long long other, int x);
 	bool checkWin(unsigned long long b);
 private:
 	Graphics* _graphics;
