@@ -19,17 +19,6 @@ void Game::aiMove() {
 	int move = 0;
 	unsigned long long p0 = _board->getBoard(0);
 	unsigned long long p1 = _board->getBoard(1);
-	// for (int i = 0; i < 7; i++) {
-	// 	unsigned long long y = insertIntoBitboard(p0, p1, i);
-	// 	if (y != 0) {
-	// 		int x = -negamax(p1, y, -100, 100, -1, 6);
-	// 		std::cout << x << "\n";
-	// 		if (x > best) {
-	// 			move = i;
-	// 			best = x;
-	// 		}
-	// 	}
-	// }
 	for (int i = 0; i < 7; i++) {
 		unsigned long long y = insertIntoBitboard(p0, p1, i);
 		if (y != 0) {
@@ -43,41 +32,6 @@ void Game::aiMove() {
 	}
 	std::cout << "\n\n";
 	_board->insert(move, 0);
-}
-
-int Game::negamax(unsigned long long p0, unsigned long long p1, int alpha, int beta, int color, int depth) {
-	if (checkWin(p0) | checkWin(p1)) {
-		if (checkWin(p1)) {
-			return color*99999999;
-		} else {
-			return color*-99999999;
-		}
-	} else if ((p0 | p1) == 562949953421312) { // if it is a tie
-		return 0;
-	} else if (depth <= 0) {
-		return analyze(p0, p1);
-	}
-
-	int best = -1000000000;
-
-	for (int i = 0; i < 7; i++) {
-		unsigned long long y = insertIntoBitboard(p0, p1, i);
-
-		if (y != 0) {
-			int x = -negamax(p1, y, -alpha, -beta, -color, depth-1);
-			if (x > best) {
-				best = x;
-			}
-			// if (x > alpha) {
-			// 	alpha = x;
-			// }
-			// if (alpha >= beta) {
-			// 	return alpha;
-			// }
-		}
-
-	}
-	return best;
 }
 
 int Game::minimax(unsigned long long blue, unsigned long long red, int alpha, int beta, int depth, bool maximize) {
