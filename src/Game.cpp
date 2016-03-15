@@ -10,8 +10,7 @@ Game::Game() {
 	_graphics = new Graphics();
 	_event = new SDL_Event();
 	_board = new Board();
-	_state = STATE::PLAYER_DECISION;
-	_board->insert(3, 0);
+	_state = STATE::AI_MOVE;
 }
 
 void Game::aiMove() {
@@ -23,14 +22,20 @@ void Game::aiMove() {
 		unsigned long long y = insertIntoBitboard(p0, p1, i);
 		if (y != 0) {
 			int x = minimax(y, p1, -100, 100, 2, false);
-			std::cout << i << ": " << x << "\n";
 			if (x > best) {
 				move = i;
 				best = x;
+			} else if (best == x) {
+				if ((move < 3 || move > 3) && i == 3) {
+					move = i;
+				} else if ((move < 2 || move > 4) && (i > 1 || i < 5)) {
+					move = i;
+				} else if ((move == 0 || move == 6) && (i > 0 || i < 6)) {
+					move = i;
+				}
 			}
 		}
 	}
-	std::cout << "\n\n";
 	_board->insert(move, 0);
 }
 
@@ -228,7 +233,7 @@ void Game::play() {
 			} else if (_state == STATE::PLAYER_DECISION && _event->type == SDL_MOUSEBUTTONUP) {
 				if (_event->button.button == SDL_BUTTON_LEFT) {
 					_board->insert(_event->button.x/(GLOBAL::WIDTH/7), 1);
-					_state = STATE::AI_MOVE;\
+					_state = STATE::AI_MOVE;
 				}
 			}
 		}
@@ -249,6 +254,7 @@ void Game::play() {
 void Game::drawBoard() {
 	_graphics->clear();
 	_board->draw(_graphics);
+	_graphics->drawFontCentered("heehehe", 875/2, 750/2);
 	_graphics->flip();
 }
 

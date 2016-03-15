@@ -24,15 +24,6 @@ void Board::insert(int x, int player) {
 	}
 }
 
-// int Board::disksInRow(int x) {
-// 	for (int y = 0; y < 6; y++) {
-// 		if (_board[x][y] == 0) {
-// 			return y+1;
-// 		}
-// 	}
-// 	return 6;
-// }
-
 unsigned long long Board::getBoard(int player) {
 	return _bitboards[player];
 }

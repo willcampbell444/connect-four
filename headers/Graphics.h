@@ -1,8 +1,16 @@
 #ifndef GRAPHICS_H
 #define GRAPHICS_H
 
+#include <string>
+#include <SDL_ttf.h>
+#include <map>
+
 struct SDL_Window;
 struct SDL_Renderer;
+struct Text {
+	SDL_Texture* texture;
+	int w, h;
+};
 
 class Graphics {
 public:
@@ -11,13 +19,16 @@ public:
 
 	void drawRect(int x1, int y1, int x2, int y2, int, int g, int b);
 	void drawFillRect(int x1, int y1, int x2, int y2, int r, int g, int b);
+	void drawFont(std::string in, int x, int y);
+	void drawFontCentered(std::string in, int x, int y);
 	void flip();
 	void clear();
 
 private:
 	SDL_Window* _window;
 	SDL_Renderer* _renderer;
+	TTF_Font* _font;
+	std::map<std::string, Text> _textTextures;
 };
-
 
 #endif
