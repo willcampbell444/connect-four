@@ -20,12 +20,20 @@ class Graphics;
 
 class Board {
 public:
-	Board();
-	void insert(int x, int player);
-	// int disksInRow(int x);
-	void draw(Graphics* graphics);
+	Board(int __x, int __y, int __w, int __h);
+	bool insert(int x, int player);
+	int screenToRow(int screenX, int screenY);
+	void draw(Graphics* graphics, int hover);
+	void resize(int __x, int __y, int __w, int __h);
 	unsigned long long getBoard(int player);
+	void clear();
 private:
+	int x;
+	int y;
+	int w;
+	int h;
+	float gridW;
+	float gridH;
 	unsigned long long _bitboards[2];
 };
 

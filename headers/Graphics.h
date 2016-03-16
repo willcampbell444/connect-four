@@ -7,6 +7,7 @@
 
 struct SDL_Window;
 struct SDL_Renderer;
+struct Color;
 struct Text {
 	SDL_Texture* texture;
 	int w, h;
@@ -17,8 +18,8 @@ public:
 	Graphics();
 	~Graphics();
 
-	void drawRect(int x1, int y1, int x2, int y2, int, int g, int b);
-	void drawFillRect(int x1, int y1, int x2, int y2, int r, int g, int b);
+	void drawRect(int x1, int y1, int x2, int y2, Color c);
+	void drawFillRect(int x1, int y1, int x2, int y2, Color c);
 	void drawFont(std::string in, int x, int y);
 	void drawFontCentered(std::string in, int x, int y);
 	void flip();

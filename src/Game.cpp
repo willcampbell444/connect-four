@@ -9,8 +9,19 @@ Game::Game() {
 	SDL_Init(SDL_INIT_VIDEO);
 	_graphics = new Graphics();
 	_event = new SDL_Event();
-	_board = new Board();
-	_state = STATE::AI_MOVE;
+	_board = new Board(0, 0, GLOBAL::WIDTH, GLOBAL::HEIGHT);
+	// _state = STATE::AI_MOVE;
+	_state = STATE::PLAYER_DECISION;
+	_mouseColumn = -1;
+	_mouseX = new int(0);
+	_mouseY = new int(0);
+
+	_quit = false;
+}
+
+void Game::restart() {
+	_board->clear();
+	_state = STATE::PLAYER_DECISION;
 }
 
 void Game::aiMove() {
@@ -21,7 +32,7 @@ void Game::aiMove() {
 	for (int i = 0; i < 7; i++) {
 		unsigned long long y = insertIntoBitboard(p0, p1, i);
 		if (y != 0) {
-			int x = minimax(y, p1, -100, 100, 2, false);
+			int x = minimax(y, p1, -100, 100, 5, false);
 			if (x > best) {
 				move = i;
 				best = x;
@@ -220,42 +231,83 @@ bool Game::checkWin(unsigned long long b) {
     return false;
 }
 
-void Game::play() {
+void Game::update() {
+	if (_state == STATE::AI_MOVE) {
+		aiMove();
+		_state = STATE::PLAYER_DECISION;
+	}
+	if (SDL_PollEvent(_event)) {
+		if (_event->type == SDL_QUIT) {
+			_quit = true;
+			return;
+		} else if (_state == STATE::PLAYER_DECISION) {
+			if (_event->type == SDL_MOUSEBUTTONUP) {
+				if (_event->button.button == SDL_BUTTON_LEFT) {
+					int r = _board->screenToRow(_event->button.x, _event->button.y);
+					if (r != -1 && _board->insert(r, 1)) {
+						_state = STATE::AI_MOVE;
+						_mouseColumn = -1;
+					}
+				}
+			} else {
+				SDL_GetMouseState(_mouseX, _mouseY);
+				_mouseColumn = _board->screenToRow(*_mouseX, *_mouseY);
+			}
+		};
+	}
+	return;
+}
+
+void Game::wait(int length, std::string message) {
+	int start = SDL_GetTicks();
+	while (start+length > SDL_GetTicks()) {
+		drawBoard(true);
+		_graphics->drawFontCentered(message, GLOBAL::WIDTH/2, GLOBAL::HEIGHT/2);
+		_graphics->flip();
+		if (SDL_PollEvent(_event) && _event->type == SDL_QUIT) {
+			_quit = true;
+			return;
+		}
+	}
+}
+
+void Game::wait(int length) {
+	int start = SDL_GetTicks();
+	while (start+length > SDL_GetTicks()) {
+		drawBoard();
+		if (SDL_PollEvent(_event) && _event->type == SDL_QUIT) {
+			_quit = true;
+			return;
+		}
+	}
+}
+
+bool Game::play() {
 	while (true) {
 		drawBoard();
-		if (_state == STATE::AI_MOVE) {
-			aiMove();
-			_state = STATE::PLAYER_DECISION;
-		}
-		if (SDL_PollEvent(_event)) {
-			if (_event->type == SDL_QUIT) {
-				break;
-			} else if (_state == STATE::PLAYER_DECISION && _event->type == SDL_MOUSEBUTTONUP) {
-				if (_event->button.button == SDL_BUTTON_LEFT) {
-					_board->insert(_event->button.x/(GLOBAL::WIDTH/7), 1);
-					_state = STATE::AI_MOVE;
-				}
-			}
+		update();
+		if (_quit) {
+			return false;
 		}
 		if (checkWin(_board->getBoard(0))) {
-			std::cout << "0\n";
-			drawBoard();
-			SDL_Delay(1000);
-			return;
+			wait(5000, "You Lose");
+			return true;
 		} else if (checkWin(_board->getBoard(1))) {
-			std::cout << "1\n";
-			drawBoard();
-			SDL_Delay(1000);
-			return;
+			wait(5000, "You Win");
+			return true;
 		}
 	}
 }
 
 void Game::drawBoard() {
 	_graphics->clear();
-	_board->draw(_graphics);
-	_graphics->drawFontCentered("heehehe", 875/2, 750/2);
+	_board->draw(_graphics, _mouseColumn);
 	_graphics->flip();
+}
+
+void Game::drawBoard(bool noFlip) {
+	_graphics->clear();
+	_board->draw(_graphics, _mouseColumn);
 }
 
 

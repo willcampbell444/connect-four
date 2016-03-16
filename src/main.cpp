@@ -2,7 +2,9 @@
 
 int main() {
 	Game game;
-	game.play();
+	while (game.play()) {
+		game.restart();
+	}
 
 	return 0;
 }
