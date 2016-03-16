@@ -32,6 +32,7 @@ private:
 	int* _mouseX;
 	int* _mouseY;
 	bool _quit;
+	bool _mouseMode;
 
 	// unsigned long long wins[69]; // Contains all possible winning boards
 };

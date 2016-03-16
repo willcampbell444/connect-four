@@ -29,6 +29,7 @@ private:
 	SDL_Window* _window;
 	SDL_Renderer* _renderer;
 	TTF_Font* _font;
+	TTF_Font* _fontOutline;
 	std::map<std::string, Text> _textTextures;
 };
 

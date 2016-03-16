@@ -11,6 +11,8 @@ Graphics::Graphics() {
 	TTF_Init();
 
 	_font = TTF_OpenFont("assets/Mohave-Bold.ttf", 160);
+	_fontOutline = TTF_OpenFont("assets/Mohave-Bold.ttf", 160);
+	TTF_SetFontOutline(_fontOutline, 1);
 }
 
 Graphics::~Graphics() {
@@ -62,7 +64,10 @@ void Graphics::drawFont(std::string in, int x, int y) {
 void Graphics::drawFontCentered(std::string in, int x, int y) {
 	if (_textTextures.find(in) == _textTextures.end()) {
 		SDL_Color c = {COLORS::TEXT.r, COLORS::TEXT.g, COLORS::TEXT.b, 0};
-		SDL_Surface* textSurface = TTF_RenderText_Blended(_font, in.c_str(), c);
+		SDL_Color cOutline = {COLORS::TEXTOUTLINE.r, COLORS::TEXTOUTLINE.g, COLORS::TEXTOUTLINE.b, 0};
+		SDL_Surface* textSurface = TTF_RenderText_Blended(_fontOutline, in.c_str(), cOutline);
+		SDL_Rect dstRect = {1, 1, 2000, 2000};
+		SDL_BlitSurface(TTF_RenderText_Blended(_font, in.c_str(), c), NULL, textSurface, &dstRect);
 		Text text;
 		text.texture = SDL_CreateTextureFromSurface(_renderer, textSurface);
 		text.w = textSurface->w;

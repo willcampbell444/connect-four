@@ -19,10 +19,13 @@ struct Color {
 namespace COLORS {
 	const Color PLAYER1 = {175, 36, 11};
 	const Color PLAYER2 = {21, 38, 119};
-	const Color BACKGROUND = {255, 255, 255};
-	const Color UNCLAIMED = {227, 151, 72};
-	const Color HIGHLIGHTED = {200, 130, 60};
-	const Color TEXT = {0, 0, 0};
+	const Color BACKGROUND = {192, 197, 206};
+	// const Color BACKGROUND = {255, 255, 255};
+	const Color UNCLAIMED = {151, 155, 162};
+	// const Color UNCLAIMED = {227, 151, 72};
+	const Color HIGHLIGHTED = {125, 130, 137};
+	const Color TEXT = {43, 48, 59};
+	const Color TEXTOUTLINE = {0, 0, 0};
 }
 
 #endif

@@ -15,6 +15,7 @@ Game::Game() {
 	_mouseColumn = -1;
 	_mouseX = new int(0);
 	_mouseY = new int(0);
+	_mouseMode = true;
 
 	_quit = false;
 }
@@ -22,17 +23,22 @@ Game::Game() {
 void Game::restart() {
 	_board->clear();
 	_state = STATE::PLAYER_DECISION;
+
+	_mouseMode = true;
+	_mouseColumn = -1;
 }
 
 void Game::aiMove() {
 	int best = -1000000000;
 	int move = 0;
+	int alpha = -99999999;
+	int beta = 99999999;
 	unsigned long long p0 = _board->getBoard(0);
 	unsigned long long p1 = _board->getBoard(1);
 	for (int i = 0; i < 7; i++) {
 		unsigned long long y = insertIntoBitboard(p0, p1, i);
 		if (y != 0) {
-			int x = minimax(y, p1, -100, 100, 5, false);
+			int x = minimax(y, p1, alpha, beta, 7, false);
 			if (x > best) {
 				move = i;
 				best = x;
@@ -74,6 +80,12 @@ int Game::minimax(unsigned long long blue, unsigned long long red, int alpha, in
 				if (x > max) {
 					max = x;
 				}
+				if (x > alpha) {
+					alpha = x;
+				}
+				if (alpha >= beta) {
+					return beta;
+				}
 			}
 		}
 
@@ -89,6 +101,12 @@ int Game::minimax(unsigned long long blue, unsigned long long red, int alpha, in
 				int x = minimax(blue, y, alpha, beta, depth-1, true);
 				if (x < min) {
 					min = x;
+				}
+				if (x < beta) {
+					beta = x;
+				}
+				if (alpha >= beta) {
+					return beta;
 				}
 			}
 
@@ -242,18 +260,43 @@ void Game::update() {
 			return;
 		} else if (_state == STATE::PLAYER_DECISION) {
 			if (_event->type == SDL_MOUSEBUTTONUP) {
-				if (_event->button.button == SDL_BUTTON_LEFT) {
+				if (!_mouseMode) {
+					_mouseMode = true;
+				} else if (_event->button.button == SDL_BUTTON_LEFT) {
 					int r = _board->screenToRow(_event->button.x, _event->button.y);
 					if (r != -1 && _board->insert(r, 1)) {
 						_state = STATE::AI_MOVE;
 						_mouseColumn = -1;
 					}
 				}
-			} else {
+			} else if (_event->type == SDL_KEYUP) {
+				_mouseMode = false;
+				if (_event->key.keysym.sym == SDLK_LEFT || _event->key.keysym.sym == SDLK_a) {
+					if (_mouseColumn < 1) {
+						_mouseColumn = 6;
+					} else {
+						_mouseColumn -= 1;
+					}
+				} else if (_event->key.keysym.sym == SDLK_RIGHT || _event->key.keysym.sym == SDLK_d) {
+					if (_mouseColumn > 5) {
+						_mouseColumn = 0;
+					} else {
+						_mouseColumn += 1;
+					}
+				} else if (_event->key.keysym.sym == SDLK_RETURN || _event->key.keysym.sym == SDLK_SPACE) {
+					if (_mouseColumn != -1) {
+						_board->insert(_mouseColumn, 1);
+						_state = STATE::AI_MOVE;
+					}
+				}
+			} else if (_event->type == SDL_MOUSEMOTION) {
+				_mouseMode = true;
+			}
+			if (_mouseMode) {
 				SDL_GetMouseState(_mouseX, _mouseY);
 				_mouseColumn = _board->screenToRow(*_mouseX, *_mouseY);
-			}
-		};
+			} 
+		}
 	}
 	return;
 }
@@ -264,9 +307,15 @@ void Game::wait(int length, std::string message) {
 		drawBoard(true);
 		_graphics->drawFontCentered(message, GLOBAL::WIDTH/2, GLOBAL::HEIGHT/2);
 		_graphics->flip();
-		if (SDL_PollEvent(_event) && _event->type == SDL_QUIT) {
-			_quit = true;
-			return;
+		if (SDL_PollEvent(_event)) {
+			if (_event->type == SDL_QUIT) {
+				_quit = true;
+				return;
+			} else if (_event->type == SDL_MOUSEBUTTONUP) {
+				return;
+			} else if (_event->type == SDL_KEYUP) {
+				return;
+			}
 		}
 	}
 }
@@ -290,10 +339,10 @@ bool Game::play() {
 			return false;
 		}
 		if (checkWin(_board->getBoard(0))) {
-			wait(5000, "You Lose");
+			wait(6000, "You Lose");
 			return true;
 		} else if (checkWin(_board->getBoard(1))) {
-			wait(5000, "You Win");
+			wait(6000, "You Win");
 			return true;
 		}
 	}
