@@ -21,6 +21,7 @@ public:
 	bool checkWin(unsigned long long b);
 	void restart();
 	void update();
+	void menu();
 	void wait(int length);
 	void wait(int length, std::string message);
 private:
@@ -33,7 +34,9 @@ private:
 	int* _mouseY;
 	bool _quit;
 	bool _mouseMode;
-
+	int _difficulty;
+	int _players;
+	int _currentPlayer;
 	// unsigned long long wins[69]; // Contains all possible winning boards
 };
 

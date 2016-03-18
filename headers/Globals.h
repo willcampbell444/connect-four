@@ -10,6 +10,7 @@ namespace GLOBAL {
 namespace STATE {
 	const int PLAYER_DECISION = 1;
 	const int AI_MOVE = 2;
+	const int CHOOSE_DIFFICULTY = 3;
 }
 
 struct Color {

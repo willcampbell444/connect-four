@@ -22,6 +22,7 @@ public:
 	void drawFillRect(int x1, int y1, int x2, int y2, Color c);
 	void drawFont(std::string in, int x, int y);
 	void drawFontCentered(std::string in, int x, int y);
+	void drawFontCentered(std::string in, int x, int y, float scale);
 	void flip();
 	void clear();
 

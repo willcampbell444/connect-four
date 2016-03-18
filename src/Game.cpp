@@ -16,6 +16,7 @@ Game::Game() {
 	_mouseX = new int(0);
 	_mouseY = new int(0);
 	_mouseMode = true;
+	_currentPlayer = 1;
 
 	_quit = false;
 }
@@ -23,6 +24,7 @@ Game::Game() {
 void Game::restart() {
 	_board->clear();
 	_state = STATE::PLAYER_DECISION;
+	_currentPlayer = 1;
 
 	_mouseMode = true;
 	_mouseColumn = -1;
@@ -35,10 +37,20 @@ void Game::aiMove() {
 	int beta = 99999999;
 	unsigned long long p0 = _board->getBoard(0);
 	unsigned long long p1 = _board->getBoard(1);
+
+	int depth;
+	if (_difficulty == 1) {
+		depth = 1;
+	} else if (_difficulty == 2) {
+		depth = 2;
+	} else {
+		depth = 7;
+	}
+
 	for (int i = 0; i < 7; i++) {
 		unsigned long long y = insertIntoBitboard(p0, p1, i);
 		if (y != 0) {
-			int x = minimax(y, p1, alpha, beta, 7, false);
+			int x = minimax(y, p1, alpha, beta, depth, false);
 			if (x > best) {
 				move = i;
 				best = x;
@@ -264,8 +276,12 @@ void Game::update() {
 					_mouseMode = true;
 				} else if (_event->button.button == SDL_BUTTON_LEFT) {
 					int r = _board->screenToRow(_event->button.x, _event->button.y);
-					if (r != -1 && _board->insert(r, 1)) {
-						_state = STATE::AI_MOVE;
+					if (r != -1 && _board->insert(r, _currentPlayer)) {
+						if (_players == 1) {
+							_state = STATE::AI_MOVE;
+						} else {
+							_currentPlayer = 1 - _currentPlayer;
+						}
 						_mouseColumn = -1;
 					}
 				}
@@ -284,9 +300,12 @@ void Game::update() {
 						_mouseColumn += 1;
 					}
 				} else if (_event->key.keysym.sym == SDLK_RETURN || _event->key.keysym.sym == SDLK_SPACE) {
-					if (_mouseColumn != -1) {
-						_board->insert(_mouseColumn, 1);
-						_state = STATE::AI_MOVE;
+					if (_mouseColumn != -1 && _board->insert(_mouseColumn, _currentPlayer)) {
+						if (_players == 1) {
+							_state = STATE::AI_MOVE;
+						} else {
+							_currentPlayer = 1 - _currentPlayer;
+						}
 					}
 				}
 			} else if (_event->type == SDL_MOUSEMOTION) {
@@ -331,18 +350,182 @@ void Game::wait(int length) {
 	}
 }
 
-bool Game::play() {
+void Game::menu() {
+	int r = 0;
+	int c = 0;
+	float boxHeight = (GLOBAL::HEIGHT-GLOBAL::GAP)/3.0f;
+	float boxWidth = (GLOBAL::WIDTH-GLOBAL::GAP)/2.0f;
+	float boxThirdWidth = (GLOBAL::WIDTH-GLOBAL::GAP)/3.0f;
+
+	int players = -1;
+	int playerHover = -1;
+	int difficulty = -1;
+	int difficultyHover = -1;
+	bool playHover = false;
 	while (true) {
-		drawBoard();
-		update();
+		_graphics->clear();
+		_graphics->drawFillRect(GLOBAL::GAP, GLOBAL::GAP, GLOBAL::WIDTH-10, boxHeight, COLORS::UNCLAIMED);
+		_graphics->drawFontCentered("Connect Four", GLOBAL::WIDTH/2, boxHeight/2+GLOBAL::GAP);
+		
+		if (players == 1 || (players == -1 && playerHover == 1)) {
+			_graphics->drawFillRect(GLOBAL::GAP, GLOBAL::GAP+boxHeight, boxWidth, boxHeight*2, COLORS::HIGHLIGHTED);
+		} else {
+			_graphics->drawFillRect(GLOBAL::GAP, GLOBAL::GAP+boxHeight, boxWidth, boxHeight*2, COLORS::UNCLAIMED);
+		}
+		_graphics->drawFontCentered("1 player", boxWidth/2, boxHeight/2+boxHeight+GLOBAL::GAP, 0.6);
+
+		if (players == 2 || (players == -1 && playerHover == 2)) {
+			_graphics->drawFillRect(boxWidth+GLOBAL::GAP, GLOBAL::GAP+boxHeight, GLOBAL::WIDTH-GLOBAL::GAP, boxHeight*2, COLORS::HIGHLIGHTED);
+		} else {
+			_graphics->drawFillRect(boxWidth+GLOBAL::GAP, GLOBAL::GAP+boxHeight, GLOBAL::WIDTH-GLOBAL::GAP, boxHeight*2, COLORS::UNCLAIMED);
+		}
+		_graphics->drawFontCentered("2 player", boxWidth+boxWidth/2, boxHeight/2+boxHeight+GLOBAL::GAP, 0.6);
+		
+		if (players == 1) {
+			if (difficulty == 1 || (difficulty == -1 && difficultyHover == 1)) {
+				_graphics->drawFillRect(GLOBAL::GAP, GLOBAL::GAP+boxHeight*2, boxThirdWidth, boxHeight*3, COLORS::HIGHLIGHTED);
+			} else {
+				_graphics->drawFillRect(GLOBAL::GAP, GLOBAL::GAP+boxHeight*2, boxThirdWidth, boxHeight*3, COLORS::UNCLAIMED);
+			}
+			_graphics->drawFontCentered("Easy", boxThirdWidth/2, boxHeight/2+boxHeight*2+GLOBAL::GAP, 0.6);
+
+			if (difficulty == 2 || (difficulty == -1 && difficultyHover == 2)) {
+				_graphics->drawFillRect(boxThirdWidth+GLOBAL::GAP, GLOBAL::GAP+boxHeight*2, boxThirdWidth*2, boxHeight*3, COLORS::HIGHLIGHTED);
+			} else {
+				_graphics->drawFillRect(boxThirdWidth+GLOBAL::GAP, GLOBAL::GAP+boxHeight*2, boxThirdWidth*2, boxHeight*3, COLORS::UNCLAIMED);
+			}	
+			_graphics->drawFontCentered("Medium", boxThirdWidth+boxThirdWidth/2, boxHeight/2+boxHeight*2+GLOBAL::GAP, 0.6);
+
+			if (difficulty == 3 || (difficulty == -1 && difficultyHover == 3)) {
+				_graphics->drawFillRect(boxThirdWidth*2+GLOBAL::GAP, GLOBAL::GAP+boxHeight*2, GLOBAL::WIDTH-GLOBAL::GAP, boxHeight*3, COLORS::HIGHLIGHTED);
+			} else {
+				_graphics->drawFillRect(boxThirdWidth*2+GLOBAL::GAP, GLOBAL::GAP+boxHeight*2, GLOBAL::WIDTH-GLOBAL::GAP, boxHeight*3, COLORS::UNCLAIMED);
+			}
+			_graphics->drawFontCentered("Hard", boxThirdWidth*2+boxThirdWidth/2, boxHeight/2+boxHeight*2+GLOBAL::GAP, 0.6);
+
+			if (playHover) {
+				_graphics->drawFillRect(GLOBAL::GAP, GLOBAL::GAP+boxHeight*3, GLOBAL::WIDTH-GLOBAL::GAP, boxHeight*4, COLORS::HIGHLIGHTED);
+			} else {
+				_graphics->drawFillRect(GLOBAL::GAP, GLOBAL::GAP+boxHeight*3, GLOBAL::WIDTH-GLOBAL::GAP, boxHeight*4, COLORS::UNCLAIMED);
+			}
+			_graphics->drawFontCentered("play", GLOBAL::WIDTH/2, boxHeight/2+boxHeight*3+GLOBAL::GAP);
+		} else {
+			if (playHover) {
+				_graphics->drawFillRect(GLOBAL::GAP, GLOBAL::GAP+boxHeight*2, GLOBAL::WIDTH-GLOBAL::GAP, boxHeight*3, COLORS::HIGHLIGHTED);
+			} else {
+				_graphics->drawFillRect(GLOBAL::GAP, GLOBAL::GAP+boxHeight*2, GLOBAL::WIDTH-GLOBAL::GAP, boxHeight*3, COLORS::UNCLAIMED);
+			}
+			_graphics->drawFontCentered("play", GLOBAL::WIDTH/2, boxHeight/2+boxHeight*2+GLOBAL::GAP);
+		}
+		_graphics->flip();
+
+		if (SDL_PollEvent(_event)) {
+			if (_event->type == SDL_QUIT) {
+				_quit = true;
+				return;
+			} else if (_event->type == SDL_MOUSEBUTTONUP) {
+				if (!_mouseMode) {
+					_mouseMode = true;
+				} else if (_event->button.button == SDL_BUTTON_LEFT) {
+					if (!_mouseMode) {
+						_mouseMode = true;
+					} else if (_event->button.x > GLOBAL::GAP && _event->button.x < boxWidth && _event->button.y > GLOBAL::GAP+boxHeight && _event->button.y < boxHeight*2) {
+						players = 1;
+						difficulty = -1;
+						difficultyHover = -1;
+						boxHeight = (GLOBAL::HEIGHT-GLOBAL::GAP)/4.0f;
+					} else if (_event->button.x > boxWidth+GLOBAL::GAP && _event->button.x < GLOBAL::WIDTH-GLOBAL::GAP && _event->button.y > GLOBAL::GAP+boxHeight && _event->button.y < boxHeight*2) {
+						players = 2;
+						boxHeight = (GLOBAL::HEIGHT-GLOBAL::GAP)/3.0f;
+					} else if (players == 1) {
+						if (_event->button.x > GLOBAL::GAP && _event->button.x < boxThirdWidth && _event->button.y > GLOBAL::GAP+boxHeight*2 && _event->button.y < boxHeight*3) {
+							difficulty = 1;
+						} else if (_event->button.x > boxThirdWidth+GLOBAL::GAP && _event->button.x < boxThirdWidth*2 && _event->button.y > GLOBAL::GAP+boxHeight*2 && _event->button.y < boxHeight*3) {
+							difficulty = 2;
+						} else if (_event->button.x > boxThirdWidth*2+GLOBAL::GAP && _event->button.x < boxThirdWidth*3 && _event->button.y > GLOBAL::GAP+boxHeight*2 && _event->button.y < boxHeight*3) {
+							difficulty = 3;
+						} else if (_event->button.x > GLOBAL::GAP && _event->button.x < GLOBAL::WIDTH-GLOBAL::GAP && _event->button.y > GLOBAL::GAP+boxHeight*3 && _event->button.y < boxHeight*4) {
+							if (difficulty != -1) {
+								_difficulty = difficulty;
+								_players = 1;
+								return;
+							}
+						}
+					} else if (_event->button.x > GLOBAL::GAP && _event->button.x < GLOBAL::WIDTH-GLOBAL::GAP && _event->button.y > GLOBAL::GAP+boxHeight*2 && _event->button.y < boxHeight*3) {
+						if (players == 2) {
+							_players = 2;
+							return;
+						}
+					}
+				}
+			} else if (_event->type == SDL_MOUSEMOTION) {
+				_mouseMode = true;
+			}
+		}
+		if (_mouseMode) {
+			SDL_GetMouseState(_mouseX, _mouseY);
+
+			if (*_mouseX > GLOBAL::GAP && *_mouseX < boxWidth && *_mouseY > GLOBAL::GAP+boxHeight && *_mouseY < boxHeight*2) {
+				playerHover = 1;
+			} else if (*_mouseX > boxWidth+GLOBAL::GAP && *_mouseX < GLOBAL::WIDTH-GLOBAL::GAP && *_mouseY > GLOBAL::GAP+boxHeight && *_mouseY < boxHeight*2) {
+				playerHover = 2;
+			} else {
+				playerHover = -1;
+			}
+
+			if (players == 1) {
+				if (*_mouseX > GLOBAL::GAP && *_mouseX < boxThirdWidth && *_mouseY > GLOBAL::GAP+boxHeight*2 && *_mouseY < boxHeight*3) {
+					difficultyHover = 1;
+				} else if (*_mouseX > boxThirdWidth+GLOBAL::GAP && *_mouseX < boxThirdWidth*2 && *_mouseY > GLOBAL::GAP+boxHeight*2 && *_mouseY < boxHeight*3) {
+					difficultyHover = 2;
+				} else if (*_mouseX > boxThirdWidth*2+GLOBAL::GAP && *_mouseX < boxThirdWidth*3 && *_mouseY > GLOBAL::GAP+boxHeight*2 && *_mouseY < boxHeight*3) {
+					difficultyHover = 3;
+				} else {
+					difficultyHover = -1;
+				}
+			}
+
+			if (players != 1) {
+				if (*_mouseX > GLOBAL::GAP && *_mouseX < GLOBAL::WIDTH-10 && *_mouseY > GLOBAL::GAP+boxHeight*2 && *_mouseY < boxHeight*3) {
+					playHover = true;
+				} else {
+					playHover = false;
+				}
+			} else {
+				if (*_mouseX > GLOBAL::GAP && *_mouseX < GLOBAL::WIDTH-10 && *_mouseY > GLOBAL::GAP+boxHeight*3 && *_mouseY < boxHeight*4) {
+					playHover = true;
+				} else {
+					playHover = false;
+				}
+			}
+		}
+	}
+}
+
+bool Game::play() {
+	if (_quit) {
+		return false;
+	}
+	menu();
+	while (true) {
 		if (_quit) {
 			return false;
 		}
+		drawBoard();
+		update();
 		if (checkWin(_board->getBoard(0))) {
-			wait(6000, "You Lose");
+			if (_players == 1) {
+				wait(6000, "You Lose");
+			} else {
+				wait(6000, "Blue Wins");
+			}
 			return true;
 		} else if (checkWin(_board->getBoard(1))) {
-			wait(6000, "You Win");
+			if (_players == 1) {
+				wait(6000, "You Win");
+			} else {
+				wait(6000, "Red Wins");
+			}
 			return true;
 		}
 	}
