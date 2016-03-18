@@ -24,6 +24,15 @@ void Board::clear() {
 	_bitboards[1] = 0;
 }
 
+bool Board::full() {
+	for (int i = 0; i < 7; i++) {
+		if ((_bitboards[0] & ((unsigned long long)1<<(5+i*7))) == 0 && (_bitboards[1] & ((unsigned long long)1<<(5+i*7))) == 0) {
+			return false;
+		}
+	}
+	return true;
+}
+
 bool Board::insert(int p, int player) {
 	p = p*7; // set x to the index of the bottom of the colomn
 

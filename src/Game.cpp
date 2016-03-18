@@ -527,9 +527,14 @@ bool Game::play() {
 				wait(6000, "Red Wins");
 			}
 			return true;
+		} else if (_board->full()) {
+			wait(6000, "It's a tie!");
+			return true;
 		}
 	}
 }
+
+
 
 void Game::drawBoard() {
 	_graphics->clear();

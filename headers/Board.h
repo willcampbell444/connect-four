@@ -27,6 +27,7 @@ public:
 	void resize(int __x, int __y, int __w, int __h);
 	unsigned long long getBoard(int player);
 	void clear();
+	bool full();
 private:
 	int x;
 	int y;
